@@ -1,0 +1,112 @@
+@startuml 03_domain_class_diagram
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 12
+skinparam roundCorner 8
+skinparam shadowing false
+
+title Personal Autobiography Website — Structural Domain & Contract Class Diagram (Week 3)
+
+enum MilestoneCategory {
+  EDUCATION
+  TECHNICAL
+  PERSONAL
+}
+
+enum SimulationMode {
+  NORMAL
+  TIMEOUT
+  ERROR
+  HALLUCINATE
+}
+
+enum AnswerSource {
+  MOCK_ADVISORY
+  DETERMINISTIC_FALLBACK
+  INPUT_REJECTED
+}
+
+class BiographyProfile <<readonly>> {
+  +fullName: string
+  +headline: string
+  +location: string
+  +university: string
+  +program: string
+  +highSchool: string
+  +languages: readonly string[]
+  +careerFocus: string
+  +shortSummary: string
+  +personalQuote: EditableSlot
+  +contactLinks: readonly ContactLink[]
+}
+
+class EditableSlot <<readonly>> {
+  +value: string
+  +isEditablePlaceholder: boolean
+  +editHint: string
+}
+
+class ContactLink <<readonly>> {
+  +label: string
+  +href: string
+  +isEditablePlaceholder: boolean
+}
+
+class TimelineMilestone <<readonly>> {
+  +id: string
+  +period: string
+  +sortOrder: number
+  +title: string
+  +institutionOrPlace: string
+  +category: MilestoneCategory
+  +summary: string
+  +details: readonly string[]
+  +tags: readonly string[]
+  +isEditablePlaceholder: boolean
+}
+
+class BiographyDataset <<readonly>> {
+  +profile: BiographyProfile
+  +milestones: readonly TimelineMilestone[]
+  +coreValues: readonly string[]
+}
+
+class QARequest {
+  +question: string
+  +mode: SimulationMode
+}
+
+class InputValidationResult {
+  +ok: boolean
+  +sanitizedQuestion: string
+  +errorCode: "EMPTY_INPUT" | "INPUT_TOO_LONG" | "PROMPT_INJECTION_BLOCKED" | null
+  +message: string | null
+}
+
+class FactMatch {
+  +factId: string
+  +title: string
+  +snippet: string
+  +score: number
+}
+
+class QAResponse {
+  +answer: string
+  +source: AnswerSource
+  +isFallback: boolean
+  +citedFactIds: readonly string[]
+  +rejectionCode: string | null
+  +validationNotes: readonly string[]
+}
+
+BiographyDataset "1" *-- "1" BiographyProfile : contains
+BiographyDataset "1" *-- "1..*" TimelineMilestone : chronicles
+BiographyProfile "1" *-- "1" EditableSlot : quote
+BiographyProfile "1" *-- "0..*" ContactLink : links
+TimelineMilestone --> MilestoneCategory : categorized by
+QARequest --> SimulationMode : configures
+QAResponse --> AnswerSource : provenance
+QAResponse ..> FactMatch : cites factIds
+
+@enduml

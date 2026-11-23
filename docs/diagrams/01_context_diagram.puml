@@ -1,0 +1,40 @@
+@startuml 01_context_diagram
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 12
+skinparam roundCorner 8
+skinparam shadowing false
+
+title Personal Autobiography Website — System Context Diagram (Week 3)
+
+actor "Visitor / SE Instructor\n(Evaluator)" as Visitor
+actor "Site Owner / Author\n(Kalenuly Bekzat)" as Author
+
+rectangle "Autobiography SPA\n(React + TypeScript + Vite)\n\n- Editorial Profile & Bio\n- Interactive Education Timeline\n- Light / Dark Theme Toggle\n- Bounded 'Ask About Bekzat' Q&A" as SPA #E8F8F5
+
+database "Browser localStorage\n(Theme Preference Only;\nZero PII Stored)" as LocalStorage #F8FAFC
+
+cloud "GitHub Platform" as GitHub #EEF2FF {
+  component "Git Repository\n(Source, SPEC.md, AGENTS.md,\nPlantUML, Tests, AI_Evidence)" as Repo
+  component "GitHub Actions CI/CD\n(Vitest, tsc, ESLint,\nBuild, npm audit)" as CI
+  component "GitHub Pages\n(Static HTTPS Hosting)" as Pages
+}
+
+Visitor --> Pages : Opens public URL (HTTPS)
+Pages --> SPA : Serves static HTML/CSS/JS bundle
+Visitor --> SPA : Reads timeline, toggles theme,\nasks bounded Q&A questions
+SPA <--> LocalStorage : Saves/loads theme ('light' | 'dark')
+
+Author --> Repo : Commits biography updates,\nspec, code, tests & docs (Git)
+Repo --> CI : Triggers automated verification\non push / pull_request
+CI --> Pages : Deploys verified dist/ bundle\non passing main branch
+
+note right of SPA
+  Privacy & Security Boundary (W5/W12):
+  - 100% static client-side execution
+  - No backend DB or exposed API keys
+  - Deep-frozen authoritative biography data
+end note
+
+@enduml

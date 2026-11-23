@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-[#FAF8F5] text-stone-900 dark:bg-[#0F1115] dark:text-stone-100 font-sans transition-colors duration-200;
+  }
+}

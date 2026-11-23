@@ -1,0 +1,59 @@
+@startuml 02_component_architecture
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 12
+skinparam roundCorner 8
+skinparam shadowing false
+
+title Personal Autobiography Website — Layered Component Architecture & Trust Boundaries (Weeks 3 & 11-12)
+
+package "Presentation Layer (src/components/)" #F8FAFC {
+  [AppShell & ErrorBoundary] as Shell
+  [Header & ThemeToggle] as Header
+  [HeroBioSection] as Hero
+  [TimelineSection\n(Filter + Sort + Expand)] as Timeline
+  [AskBekzatWidget\n(Advisory Panel + Demo Mode)] as QAWidget
+}
+
+package "State & Browser Adapter Layer (src/hooks/)" #FFF8E7 {
+  [useTheme\n(localStorage + prefers-color-scheme)] as ThemeHook
+}
+
+package "Authoritative Deterministic Core (Source of Truth)" #E8F8F5 {
+  [biography.ts\n(Deep-Frozen BIOGRAPHY_DATA\n+ Editable Slot Markers)] as BioData
+  [timelineFilter.ts\n(Pure filter & chronological sort)] as FilterLogic
+  [biographySearch.ts\n(Deterministic keyword/topic retrieval)] as SearchLogic
+}
+
+package "Bounded AI / Advisory Boundary (src/utils/)" #EEF2FF {
+  [inputGuard.ts\n(Length <= 200, Control-Char Strip,\nPrompt-Injection Detector)] as InputGuard
+  [bioAssistant.ts\n(Clearly Labeled Mock Advisory Adapter\n+ Simulation Modes: normal/timeout/error/hallucinate)] as Adapter
+  [outputGuard.ts\n(<= 320 chars, <= 3 sentences,\nGrounding Check & Deterministic Fallback)] as OutputGuard
+}
+
+Shell --> Header
+Shell --> Hero
+Shell --> Timeline
+Shell --> QAWidget
+
+Header --> ThemeHook
+Hero --> BioData : read-only
+Timeline --> BioData : read-only
+Timeline --> FilterLogic : filter & sort
+
+QAWidget --> InputGuard : 1. untrusted query
+InputGuard --> SearchLogic : 2. sanitized query
+SearchLogic --> BioData : read-only fact lookup
+SearchLogic --> Adapter : 3. structured FactMatch[]
+Adapter --> OutputGuard : 4. raw advisory draft
+OutputGuard --> QAWidget : 5. verified QAResponse\n(provenance badge + factIds)
+
+note bottom of BioData
+  Trust Boundary Rule (AC-01 / AC-08):
+  BIOGRAPHY_DATA is recursively frozen.
+  Advisory Q&A can ONLY read facts;
+  it can NEVER mutate biography state.
+end note
+
+@enduml

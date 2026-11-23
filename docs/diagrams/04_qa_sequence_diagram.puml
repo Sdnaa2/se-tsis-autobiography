@@ -1,0 +1,59 @@
+@startuml 04_qa_sequence_diagram
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName "Segoe UI"
+skinparam defaultFontSize 12
+skinparam roundCorner 8
+skinparam shadowing false
+
+title Bounded 'Ask About Bekzat' Q&A — Trust Boundary, Injection Defense & Fallback Sequence (Weeks 3, 11-12)
+
+actor "Visitor / Instructor" as Visitor
+
+box "Untrusted Input Layer" #FFF8E7
+  participant "AskBekzatWidget\n(React UI)" as UI
+  participant "inputGuard.ts\nvalidateQuestionInput()" as InputGuard
+end box
+
+box "Authoritative Deterministic Core" #E8F8F5
+  participant "biographySearch.ts\nretrieveRelevantFacts()" as Search
+  database "BIOGRAPHY_DATA\n(Deep-Frozen readonly)" as Data
+end box
+
+box "Bounded Advisory Boundary" #EEF2FF
+  participant "bioAssistant.ts\nrunMockAdvisoryAdapter()" as Adapter
+  participant "outputGuard.ts\nvalidateAssistantOutput()\n+ buildDeterministicFallback()" as OutputGuard
+end box
+
+Visitor -> UI : 1. Enter question (+ optional SimulationMode)
+UI -> InputGuard : 2. validateQuestionInput(rawQuestion)
+
+alt Empty / >200 chars / Prompt Injection Detected (AC-05, AC-06)
+  InputGuard --> UI : { ok: false, errorCode, safeMessage }
+  UI -> Visitor : Display safe validation notice\n(Authoritative biography untouched)
+else Valid Sanitized Question
+  InputGuard --> UI : { ok: true, sanitizedQuestion }
+  UI -> Search : 3. retrieveRelevantFacts(sanitizedQuestion, BIOGRAPHY_DATA)
+  Search -> Data : Read-only lookup
+  Data --> Search : Frozen profile & milestone records
+  Search --> UI : 4. FactMatch[] (0..3 grounded snippets)
+
+  UI -> Adapter : 5. runMockAdvisoryAdapter(sanitizedQuestion, factMatches, mode)
+
+  alt mode == NORMAL (Response within timeout)
+    Adapter --> OutputGuard : Raw advisory text + citedFactIds
+    OutputGuard -> OutputGuard : 6. Check Output Contract (AC-04, AC-07)\n- Non-empty, <= 320 chars, <= 3 sentences\n- No raw HTML/script tags\n- No ungrounded/contradictory claims
+    alt Contract Valid
+      OutputGuard --> UI : 7a. QAResponse\n{ source: MOCK_ADVISORY, isFallback: false, citedFactIds }
+    else Contract Violated (e.g. Over-length / Contradiction)
+      OutputGuard --> UI : 7b. buildDeterministicFallback(factMatches)\n{ source: DETERMINISTIC_FALLBACK, isFallback: true }
+    end
+  else mode == TIMEOUT | ERROR | HALLUCINATE (AC-07)
+    Adapter --> OutputGuard : Simulated failure or ungrounded draft
+    OutputGuard --> UI : 7c. buildDeterministicFallback(factMatches)\n{ source: DETERMINISTIC_FALLBACK, isFallback: true }
+  end
+
+  UI -> Visitor : 8. Render answer inside clearly separated Advisory Card\nwith provenance badge + cited milestone IDs (AC-08)
+end
+
+@enduml
