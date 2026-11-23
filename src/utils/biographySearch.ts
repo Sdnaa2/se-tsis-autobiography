@@ -12,6 +12,8 @@ const STOP_WORDS = new Set([
   'does',
   'for',
   'from',
+  'get',
+  'go',
   'have',
   'he',
   'his',
@@ -20,11 +22,14 @@ const STOP_WORDS = new Set([
   'is',
   'it',
   'kalenuly',
+  'me',
   'of',
   'on',
   'or',
+  'tell',
   'the',
   'to',
+  'up',
   'what',
   'when',
   'where',
@@ -34,12 +39,33 @@ const STOP_WORDS = new Set([
   'with',
 ]);
 
-function tokenize(text: string): string[] {
+function normalizeStem(word: string): string {
+  if (word.length > 5 && word.endsWith('ing')) {
+    return word.slice(0, -3);
+  }
+  if (word.length > 4 && word.endsWith('ies')) {
+    return `${word.slice(0, -3)}y`;
+  }
+  if (word.length > 4 && word.endsWith('es')) {
+    return word.slice(0, -2);
+  }
+  if (word.length > 3 && word.endsWith('s') && !word.endsWith('ss') && word !== 'nis') {
+    return word.slice(0, -1);
+  }
+  return word;
+}
+
+export function tokenizeText(text: string): string[] {
   return text
     .toLowerCase()
     .replace(/[^a-z0-9\s-]/g, ' ')
-    .split(/\s+/)
-    .filter((token) => token.length >= 2 && !STOP_WORDS.has(token));
+    .split(/[\s-]+/)
+    .filter((token) => token.length >= 2 && !STOP_WORDS.has(token))
+    .map(normalizeStem);
+}
+
+function buildWordSet(text: string): Set<string> {
+  return new Set(tokenizeText(text));
 }
 
 function buildProfileEntries(dataset: BiographyDataset): Array<{
@@ -59,7 +85,7 @@ function buildProfileEntries(dataset: BiographyDataset): Array<{
     {
       factId: 'profile-languages-career',
       title: 'Languages & Career Focus',
-      searchable: `${profile.languages.join(' ')} ${profile.careerFocus} language speak career job backend goal`,
+      searchable: `${profile.languages.join(' ')} ${profile.careerFocus} language speak career job backend goal aim next`,
       snippet: `Bekzat speaks ${profile.languages.join(', ')} and is focused on ${profile.careerFocus}.`,
     },
     {
@@ -82,7 +108,7 @@ export function retrieveRelevantFacts(
   dataset: BiographyDataset,
   limit = 3,
 ): FactMatch[] {
-  const tokens = tokenize(question);
+  const tokens = Array.from(new Set(tokenizeText(question)));
   if (tokens.length === 0) {
     return [];
   }
@@ -90,26 +116,26 @@ export function retrieveRelevantFacts(
   const candidates: FactMatch[] = [];
 
   for (const milestone of dataset.milestones) {
-    const haystack = [
-      milestone.title,
-      milestone.institutionOrPlace,
-      milestone.period,
-      milestone.category,
-      milestone.summary,
-      milestone.details.join(' '),
-      milestone.tags.join(' '),
-    ]
-      .join(' ')
-      .toLowerCase();
+    const haystackWords = buildWordSet(
+      [
+        milestone.title,
+        milestone.institutionOrPlace,
+        milestone.period,
+        milestone.category,
+        milestone.summary,
+        milestone.details.join(' '),
+        milestone.tags.join(' '),
+      ].join(' '),
+    );
+    const titleWords = buildWordSet(milestone.title);
+    const tagWords = buildWordSet(milestone.tags.join(' '));
 
     let score = 0;
     for (const token of tokens) {
-      if (haystack.includes(token)) {
+      if (haystackWords.has(token)) {
         score += 1;
-        if (milestone.title.toLowerCase().includes(token)) score += 1;
-        if (milestone.tags.some((tag) => tag.toLowerCase().includes(token))) {
-          score += 1;
-        }
+        if (titleWords.has(token)) score += 1;
+        if (tagWords.has(token)) score += 1;
       }
     }
 
@@ -124,10 +150,10 @@ export function retrieveRelevantFacts(
   }
 
   for (const entry of buildProfileEntries(dataset)) {
-    const haystack = entry.searchable.toLowerCase();
+    const entryWords = buildWordSet(entry.searchable);
     let score = 0;
     for (const token of tokens) {
-      if (haystack.includes(token)) {
+      if (entryWords.has(token)) {
         score += 1;
       }
     }

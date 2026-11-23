@@ -2,6 +2,9 @@
 
 An editorial, spec-driven **Personal Autobiography Website** built for **KBTU Software Engineering (`CSCI 202609`, Fall 2026 — TSIS Student-Made Project, 8 pts)**. Rather than a plain static HTML page, the repository demonstrates the full 14-week SE syllabus: requirements engineering, PlantUML system modeling, TDD, trust-boundary engineering, prompt-injection defense, CI/CD, and Level D AI disclosure.
 
+- **Live Deployment (GitHub Pages):** https://sdnaa2.github.io/se-tsis-autobiography/
+- **Repository:** https://github.com/Sdnaa2/se-tsis-autobiography
+
 ---
 
 ## Live Architecture & Key Features

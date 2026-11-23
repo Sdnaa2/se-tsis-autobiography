@@ -41,11 +41,11 @@ export function TimelineSection({ milestones }: TimelineSectionProps) {
     <section
       id="timeline"
       aria-labelledby="timeline-heading"
-      className="border-b border-stone-200 dark:border-stone-800 py-12"
+      className="scroll-mt-20 border-b border-stone-200 dark:border-stone-800 py-12"
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="font-mono text-xs uppercase tracking-wider text-amber-700 dark:text-amber-400">
+          <p className="font-mono text-xs uppercase tracking-wider text-amber-800 dark:text-amber-400">
             Authoritative Life &amp; Education Record
           </p>
           <h2
@@ -61,7 +61,7 @@ export function TimelineSection({ milestones }: TimelineSectionProps) {
           onClick={() =>
             setSortDirection((prev) => (prev === 'asc' ? 'desc' : 'asc'))
           }
-          className="inline-flex items-center self-start gap-2 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 px-3 py-1.5 text-xs font-medium text-stone-700 dark:text-stone-200 hover:border-stone-400 dark:hover:border-stone-500 transition-colors"
+          className="inline-flex items-center self-start gap-2 rounded-lg border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 px-3 py-1.5 text-xs font-medium text-stone-800 dark:text-stone-200 hover:border-stone-400 dark:hover:border-stone-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600 transition-colors"
         >
           <ArrowUpDown className="h-3.5 w-3.5" aria-hidden="true" />
           <span>
@@ -83,7 +83,7 @@ export function TimelineSection({ milestones }: TimelineSectionProps) {
               type="button"
               aria-pressed={active}
               onClick={() => setCategory(option.id)}
-              className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${
+              className={`rounded-full px-3.5 py-1.5 text-xs font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600 transition-colors ${
                 active
                   ? 'bg-stone-900 text-white dark:bg-amber-500 dark:text-stone-950'
                   : 'border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-700 dark:text-stone-300 hover:border-stone-400'
@@ -98,6 +98,7 @@ export function TimelineSection({ milestones }: TimelineSectionProps) {
       <ol className="mt-8 space-y-6 border-l-2 border-stone-200 dark:border-stone-800 pl-6">
         {visibleMilestones.map((item) => {
           const isExpanded = Boolean(expandedIds[item.id]);
+          const detailsId = `milestone-details-${item.id}`;
           return (
             <li key={item.id} className="relative">
               <span
@@ -110,7 +111,7 @@ export function TimelineSection({ milestones }: TimelineSectionProps) {
                   <span className="font-mono text-xs font-medium text-amber-800 dark:text-amber-400">
                     {item.period}
                   </span>
-                  <span className="rounded-full bg-stone-100 dark:bg-stone-800 px-2.5 py-0.5 font-mono text-[11px] uppercase tracking-wide text-stone-600 dark:text-stone-300">
+                  <span className="rounded-full bg-stone-100 dark:bg-stone-800 px-2.5 py-0.5 font-mono text-[11px] uppercase tracking-wide text-stone-700 dark:text-stone-300">
                     {item.category}
                   </span>
                 </div>
@@ -118,7 +119,7 @@ export function TimelineSection({ milestones }: TimelineSectionProps) {
                 <h3 className="mt-2 font-serif text-xl font-semibold text-stone-900 dark:text-stone-100">
                   {item.title}
                 </h3>
-                <p className="text-xs font-medium text-stone-500 dark:text-stone-400">
+                <p className="text-xs font-medium text-stone-600 dark:text-stone-400">
                   {item.institutionOrPlace}
                 </p>
 
@@ -127,7 +128,10 @@ export function TimelineSection({ milestones }: TimelineSectionProps) {
                 </p>
 
                 {isExpanded && (
-                  <ul className="mt-3 space-y-1.5 border-t border-stone-100 dark:border-stone-800 pt-3 text-sm text-stone-600 dark:text-stone-400">
+                  <ul
+                    id={detailsId}
+                    className="mt-3 space-y-1.5 border-t border-stone-100 dark:border-stone-800 pt-3 text-sm text-stone-700 dark:text-stone-300"
+                  >
                     {item.details.map((detail) => (
                       <li key={detail}>• {detail}</li>
                     ))}
@@ -139,7 +143,7 @@ export function TimelineSection({ milestones }: TimelineSectionProps) {
                     {item.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="rounded bg-stone-100 dark:bg-stone-800 px-2 py-0.5 font-mono text-[11px] text-stone-600 dark:text-stone-400"
+                        className="rounded bg-stone-100 dark:bg-stone-800 px-2 py-0.5 font-mono text-[11px] text-stone-700 dark:text-stone-300"
                       >
                         #{tag}
                       </span>
@@ -149,8 +153,9 @@ export function TimelineSection({ milestones }: TimelineSectionProps) {
                   <button
                     type="button"
                     aria-expanded={isExpanded}
+                    aria-controls={detailsId}
                     onClick={() => toggleExpand(item.id)}
-                    className="inline-flex items-center gap-1 text-xs font-medium text-amber-800 dark:text-amber-400 hover:underline"
+                    className="inline-flex items-center gap-1 rounded px-1 py-0.5 text-xs font-medium text-amber-800 dark:text-amber-400 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600"
                   >
                     <span>{isExpanded ? 'Hide notes' : 'Read chapter notes'}</span>
                     {isExpanded ? (

@@ -3,15 +3,15 @@ import { InputValidationResult } from '../types/biography';
 export const MAX_QUESTION_LENGTH = 200;
 
 const INJECTION_PATTERNS: readonly RegExp[] = [
-  /ignore\s+(all\s+)?(previous|prior|above)\s+instructions?/i,
-  /disregard\s+(all\s+)?(previous|prior|above)\s+instructions?/i,
-  /reveal\s+(the\s+)?(system\s+prompt|hidden\s+instructions?)/i,
+  /(?:ignore|disregard|forget)\s+(?:all\s+)?(?:previous|prior|above)\s+instructions?/i,
+  /reveal\s+(?:the\s+)?(?:system\s+prompt|hidden\s+instructions?)/i,
   /system\s+prompt/i,
   /pretend\s+you\s+are/i,
   /act\s+as\s+(?:a\s+)?(?:different|unrestricted|admin)/i,
   /override\s+(?:rules|biography|facts|safety)/i,
-  /<\s*script\b/i,
-  /on(?:error|load|click)\s*=/i,
+  /\bjailbreak\b/i,
+  /<\s*(?:script|iframe|svg|object|embed)\b/i,
+  /on(?:error|load|click|mouseover)\s*=/i,
   /javascript\s*:/i,
 ];
 

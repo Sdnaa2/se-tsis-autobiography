@@ -16,7 +16,7 @@
 - `src/utils/inputGuard.ts` — Untrusted input validation (`<= 200` chars, control-char strip, prompt-injection guard).
 - `src/utils/bioAssistant.ts` — Clearly labeled Mock Advisory Adapter (`normal`, `timeout`, `error`, `hallucinate` modes).
 - `src/utils/outputGuard.ts` — Output contract validator (`<= 320` chars, `<= 3` sentences, grounding/XSS check) + deterministic fallback.
-- `src/components/` — Presentation components (`ErrorBoundary`, `Header`, `HeroBio`, `TimelineSection`, `AskBekzatWidget`).
+- `src/components/` — Presentation components (`ErrorBoundary`, `Header`, `HeroBio`, `TimelineSection`, `AskBekzatWidget`, `Footer`).
 
 ---
 

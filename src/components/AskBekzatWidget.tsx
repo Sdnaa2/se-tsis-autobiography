@@ -22,6 +22,8 @@ export function AskBekzatWidget() {
   const [mode, setMode] = useState<SimulationMode>('normal');
   const [response, setResponse] = useState<QAResponse | null>(null);
 
+  const isOverLimit = question.length > MAX_QUESTION_LENGTH;
+
   const runQuery = (text: string, activeMode: SimulationMode) => {
     const result = askAboutBekzat(text, activeMode);
     setResponse(result);
@@ -36,13 +38,13 @@ export function AskBekzatWidget() {
     <section
       id="ask-bekzat"
       aria-labelledby="qa-heading"
-      className="py-12"
+      className="scroll-mt-20 py-12"
     >
-      <div className="rounded-2xl border-2 border-dashed border-amber-400/80 dark:border-amber-700/70 bg-amber-50/50 dark:bg-stone-900/90 p-6 sm:p-8">
+      <div className="rounded-2xl border-2 border-dashed border-amber-400/80 dark:border-amber-700/70 bg-amber-50/50 dark:bg-stone-900/90 p-5 sm:p-8">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-amber-800 dark:text-amber-400">
-              <Bot className="h-4 w-4" aria-hidden="true" />
+            <div className="inline-flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-amber-900 dark:text-amber-400">
+              <Bot className="h-4 w-4 shrink-0" aria-hidden="true" />
               <span>Bounded Advisory Q&amp;A · Trust Boundary Demo (W11–W12)</span>
             </div>
             <h2
@@ -51,7 +53,7 @@ export function AskBekzatWidget() {
             >
               Ask About Bekzat
             </h2>
-            <p className="mt-1 text-sm text-stone-600 dark:text-stone-400">
+            <p className="mt-1 text-sm text-stone-700 dark:text-stone-300">
               Strictly grounded in the frozen biography dataset above. Input is
               capped at {MAX_QUESTION_LENGTH} characters and guarded against
               prompt injection.
@@ -61,7 +63,7 @@ export function AskBekzatWidget() {
           <div className="flex flex-col gap-1">
             <label
               htmlFor="simulation-mode"
-              className="font-mono text-[11px] uppercase tracking-wider text-stone-500 dark:text-stone-400"
+              className="font-mono text-[11px] uppercase tracking-wider text-stone-600 dark:text-stone-400"
             >
               Defense Simulation Mode
             </label>
@@ -88,7 +90,7 @@ export function AskBekzatWidget() {
                 setQuestion(starter);
                 runQuery(starter, mode);
               }}
-              className="rounded-full border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-950 px-3 py-1 text-xs text-stone-700 dark:text-stone-300 hover:border-amber-600 dark:hover:border-amber-500 transition-colors"
+              className="rounded-full border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-950 px-3 py-1 text-left text-xs text-stone-700 dark:text-stone-300 hover:border-amber-600 dark:hover:border-amber-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600 transition-colors"
             >
               {starter}
             </button>
@@ -105,18 +107,32 @@ export function AskBekzatWidget() {
               type="text"
               value={question}
               maxLength={MAX_QUESTION_LENGTH + 25}
+              aria-describedby="qa-char-count"
+              aria-invalid={isOverLimit}
               onChange={(e) => setQuestion(e.target.value)}
               placeholder="Ask about NIS Kyzylorda, KBTU, openEuler, anime, or test prompt injection..."
-              className="w-full rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-950 px-4 py-2.5 text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-600"
+              className="w-full rounded-xl border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-950 px-4 py-2.5 text-sm text-stone-900 dark:text-stone-100 placeholder:text-stone-500 dark:placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-600"
             />
-            <div className="mt-1 flex justify-end font-mono text-[11px] text-stone-500 dark:text-stone-400">
-              {question.length}/{MAX_QUESTION_LENGTH} chars
+            <div
+              id="qa-char-count"
+              className={`mt-1 flex justify-between font-mono text-[11px] ${
+                isOverLimit
+                  ? 'font-semibold text-red-700 dark:text-red-400'
+                  : 'text-stone-600 dark:text-stone-400'
+              }`}
+            >
+              <span>
+                {mode !== 'normal' ? `Active simulation: ${mode}` : ''}
+              </span>
+              <span>
+                {question.length}/{MAX_QUESTION_LENGTH} chars
+              </span>
             </div>
           </div>
 
           <button
             type="submit"
-            className="inline-flex h-[42px] items-center justify-center gap-2 rounded-xl bg-stone-900 px-5 text-sm font-medium text-white hover:bg-stone-700 dark:bg-amber-500 dark:text-stone-950 dark:hover:bg-amber-400 transition-colors"
+            className="inline-flex h-[42px] items-center justify-center gap-2 rounded-xl bg-stone-900 px-5 text-sm font-medium text-white hover:bg-stone-700 dark:bg-amber-500 dark:text-stone-950 dark:hover:bg-amber-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600 transition-colors"
           >
             <Send className="h-4 w-4" aria-hidden="true" />
             <span>Ask</span>
@@ -150,14 +166,14 @@ export function AskBekzatWidget() {
                   ) : response.isFallback ? (
                     <>
                       <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" aria-hidden="true" />
-                      <span className="text-amber-800 dark:text-amber-300">
+                      <span className="text-amber-900 dark:text-amber-300">
                         Safe Deterministic Fallback
                       </span>
                     </>
                   ) : (
                     <>
                       <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
-                      <span className="text-emerald-700 dark:text-emerald-300">
+                      <span className="text-emerald-800 dark:text-emerald-300">
                         Advisory — Mock Grounded
                       </span>
                     </>
@@ -165,7 +181,7 @@ export function AskBekzatWidget() {
                 </span>
 
                 {response.citedFactIds.length > 0 && (
-                  <span className="font-mono text-[11px] text-stone-500 dark:text-stone-400">
+                  <span className="font-mono text-[11px] text-stone-600 dark:text-stone-400">
                     Cited: {response.citedFactIds.join(', ')}
                   </span>
                 )}
@@ -176,7 +192,7 @@ export function AskBekzatWidget() {
               </p>
 
               {response.validationNotes.length > 0 && (
-                <p className="mt-2 font-mono text-[11px] text-stone-500 dark:text-stone-400">
+                <p className="mt-2 font-mono text-[11px] text-stone-600 dark:text-stone-400">
                   Boundary log: {response.validationNotes.join(' ')}
                 </p>
               )}

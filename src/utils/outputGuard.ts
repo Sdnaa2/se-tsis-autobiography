@@ -71,7 +71,7 @@ export function buildDeterministicFallback(
   if (matches.length === 0) {
     return {
       answer:
-        'That detail is not listed in Bekzat’s verified biography. Try asking about Kyzylorda, NIS, KBTU, languages, or hobbies.',
+        'That detail is not listed in Bekzat’s verified biography. Try asking about his hometown, education, technical coursework, or personal interests.',
       source: 'DETERMINISTIC_FALLBACK',
       isFallback: true,
       citedFactIds: [],
@@ -90,7 +90,7 @@ export function buildDeterministicFallback(
     answer: safeSnippet,
     source: 'DETERMINISTIC_FALLBACK',
     isFallback: true,
-    citedFactIds: matches.map((m) => m.factId),
+    citedFactIds: [top.factId],
     rejectionCode: null,
     validationNotes: [reasonNote],
   };

@@ -3,11 +3,11 @@ import { askAboutBekzat } from '../utils/bioAssistant';
 import { countSentences, MAX_ANSWER_LENGTH } from '../utils/outputGuard';
 
 describe('askAboutBekzat & outputGuard (TC-06, TC-07, TC-11, TC-12)', () => {
-  it('returns a grounded answer with citedFactIds for NIS Kyzylorda (TC-06)', () => {
+  it('returns a grounded answer citing exact single provenance factId for NIS Kyzylorda (TC-06)', () => {
     const res = askAboutBekzat('Where did Bekzat go to high school NIS?');
     expect(res.source).toBe('MOCK_ADVISORY');
     expect(res.isFallback).toBe(false);
-    expect(res.citedFactIds.length).toBeGreaterThan(0);
+    expect(res.citedFactIds.length).toBe(1);
     expect(res.answer.length).toBeLessThanOrEqual(MAX_ANSWER_LENGTH);
     expect(countSentences(res.answer)).toBeLessThanOrEqual(3);
   });
@@ -23,18 +23,27 @@ describe('askAboutBekzat & outputGuard (TC-06, TC-07, TC-11, TC-12)', () => {
     const timeoutRes = askAboutBekzat('Tell me about KBTU', 'timeout');
     expect(timeoutRes.source).toBe('DETERMINISTIC_FALLBACK');
     expect(timeoutRes.isFallback).toBe(true);
-    expect(timeoutRes.citedFactIds.length).toBeGreaterThan(0);
+    expect(timeoutRes.citedFactIds.length).toBe(1);
 
     const errorRes = askAboutBekzat('Tell me about KBTU', 'error');
     expect(errorRes.source).toBe('DETERMINISTIC_FALLBACK');
     expect(errorRes.isFallback).toBe(true);
   });
 
-  it('catches simulated hallucination / XSS / over-length draft and replaces with fallback (TC-12)', () => {
+  it('handles out-of-scope simulated timeout without crashing or citing facts', () => {
+    const res = askAboutBekzat('Does Bekzat own a spaceship?', 'timeout');
+    expect(res.source).toBe('DETERMINISTIC_FALLBACK');
+    expect(res.isFallback).toBe(true);
+    expect(res.citedFactIds).toEqual([]);
+  });
+
+  it('catches simulated hallucination / XSS / over-length / >3-sentence draft and replaces with fallback (TC-12)', () => {
     const res = askAboutBekzat('Tell me about KBTU', 'hallucinate');
     expect(res.source).toBe('DETERMINISTIC_FALLBACK');
     expect(res.isFallback).toBe(true);
     expect(res.answer).not.toContain('MIT');
     expect(res.answer).not.toContain('<script>');
+    expect(res.validationNotes[0]).toContain('320');
+    expect(res.validationNotes[0]).toContain('3 sentences');
   });
 });

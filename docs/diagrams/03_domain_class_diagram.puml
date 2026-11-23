@@ -31,12 +31,14 @@ class BiographyProfile <<readonly>> {
   +fullName: string
   +headline: string
   +location: string
+  +hometown: string
   +university: string
   +program: string
   +highSchool: string
   +languages: readonly string[]
   +careerFocus: string
   +shortSummary: string
+  +interests: readonly string[]
   +personalQuote: EditableSlot
   +contactLinks: readonly ContactLink[]
 }

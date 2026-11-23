@@ -29,7 +29,7 @@ function runMockAdvisoryAdapter(
     return {
       ok: true,
       draft:
-        'Bekzat graduated from MIT with a PhD in Quantum Computing and <script>alert(1)</script> has worked as a principal architect for 15 years across five continents, which completely contradicts the verified record and exceeds the allowed contract length for this bounded widget.',
+        'Bekzat graduated from MIT with a PhD in Quantum Computing and <script>alert(1)</script> has worked as a principal architect for 15 years across five continents. He also won seven international robotics medals. He launched four unicorn startups. This fabricated output violates sentence, length, markup, and factual grounding contracts.',
     };
   }
 
@@ -84,11 +84,13 @@ export function askAboutBekzat(
     );
   }
 
+  const citedFactIds = matches[0] ? [matches[0].factId] : [];
+
   return {
     answer: adapterResult.draft.trim(),
     source: 'MOCK_ADVISORY',
     isFallback: false,
-    citedFactIds: matches.map((m) => m.factId),
+    citedFactIds,
     rejectionCode: null,
     validationNotes: ['Output contract verified (<=320 chars, <=3 sentences, grounded).'],
   };
